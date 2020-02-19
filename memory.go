@@ -6,7 +6,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type memory struct {
+type MemoryStore struct {
 	logger *zap.Logger
 	store  gokv.Store
 	// store
@@ -16,7 +16,7 @@ type memory struct {
 // Memory creates a joe.Module
 func Memory(store gokv.Store) joe.Module {
 	return joe.ModuleFunc(func(conf *joe.Config) error {
-		mem, err := NewMemory(store, WithLogger(conf.Logger("gokv-memory")))
+		mem, err := NewMemory(store, WithLogger(conf.Logger("gokv-MemoryStore")))
 		if err != nil {
 			return err
 		}
@@ -26,9 +26,9 @@ func Memory(store gokv.Store) joe.Module {
 	})
 }
 
-// NewMemory is memory struct constructor
-func NewMemory(store gokv.Store, options ...Option) (*memory, error) {
-	m := &memory{store: store}
+// NewMemory is MemoryStore struct constructor
+func NewMemory(store gokv.Store, options ...Option) (*MemoryStore, error) {
+	m := &MemoryStore{store: store}
 
 	for _, opt := range options {
 		err := opt(m)
@@ -38,7 +38,7 @@ func NewMemory(store gokv.Store, options ...Option) (*memory, error) {
 	}
 
 	if m.keys == nil {
-		m.keys = mapKeys{}
+		m.keys = &mapKeys{}
 	}
 
 	if m.logger == nil {
@@ -48,17 +48,17 @@ func NewMemory(store gokv.Store, options ...Option) (*memory, error) {
 	return m, nil
 }
 
-func (m memory) Set(key string, value []byte) error {
+func (m MemoryStore) Set(key string, value []byte) error {
 	m.keys.OnAdd(key)
 	return m.store.Set(key, value)
 }
 
-func (m memory) Get(key string) (value []byte, ok bool, err error) {
+func (m MemoryStore) Get(key string) (value []byte, ok bool, err error) {
 	ok, err = m.store.Get(key, &value)
 	return
 }
 
-func (m memory) Delete(key string) (bool, error) {
+func (m MemoryStore) Delete(key string) (bool, error) {
 	m.keys.OnDelete(key)
 	err := m.store.Delete(key)
 	if err != nil {
@@ -67,10 +67,10 @@ func (m memory) Delete(key string) (bool, error) {
 	return true, nil
 }
 
-func (m memory) Keys() ([]string, error) {
+func (m MemoryStore) Keys() ([]string, error) {
 	return m.keys.Keys(), nil
 }
 
-func (m memory) Close() error {
+func (m MemoryStore) Close() error {
 	return m.store.Close()
 }

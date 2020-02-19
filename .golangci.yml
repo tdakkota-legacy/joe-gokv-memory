@@ -1,0 +1,33 @@
+linters:
+  enable:
+    - bodyclose
+    - deadcode
+    - errcheck
+    - gochecknoinits
+    - goconst
+    - gocritic
+    # - gofmt
+    # - goimports
+    - golint
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - interfacer
+    - misspell
+    - nakedret
+    - staticcheck
+    - structcheck
+    - stylecheck
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - varcheck
+    - whitespace
+    - gochecknoglobals
+    - maligned
+    - prealloc
+
+  skip-files:
+    - "examples/*"
