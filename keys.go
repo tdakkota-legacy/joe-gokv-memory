@@ -14,19 +14,19 @@ type mapKeys struct {
 	m    sync.RWMutex
 }
 
-func (m mapKeys) OnAdd(key string) {
+func (m *mapKeys) OnAdd(key string) {
 	m.m.Lock()
 	defer m.m.Unlock()
 	m.keys[key] = struct{}{}
 }
 
-func (m mapKeys) OnDelete(key string) {
+func (m *mapKeys) OnDelete(key string) {
 	m.m.Lock()
 	defer m.m.Unlock()
 	delete(m.keys, key)
 }
 
-func (m mapKeys) Keys() []string {
+func (m *mapKeys) Keys() []string {
 	m.m.RLock()
 	defer m.m.RUnlock()
 	keys := make([]string, 0, len(m.keys))
