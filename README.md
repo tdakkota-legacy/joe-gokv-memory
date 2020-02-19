@@ -1,4 +1,4 @@
-# Joe Bot - gokv Adapter
+# Joe Bot - gokv Adapter [![Go Report Card](https://goreportcard.com/badge/github.com/tdakkota/joe-gokv-memory)](https://goreportcard.com/report/github.com/tdakkota/joe-gokv-memory)
 Integration [Joe] with [gokv].
 
 ## Getting Started

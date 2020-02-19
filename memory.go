@@ -15,6 +15,7 @@ type memory struct {
 	keysMutex sync.RWMutex
 }
 
+// creates a joe.Module
 func Memory(store gokv.Store) joe.Module {
 	return joe.ModuleFunc(func(conf *joe.Config) error {
 		mem, err := NewMemory(store, WithLogger(conf.Logger("gokv-memory")))
@@ -27,6 +28,7 @@ func Memory(store gokv.Store) joe.Module {
 	})
 }
 
+// memory struct constructor
 func NewMemory(store gokv.Store, options ...Option) (*memory, error) {
 	m := &memory{
 		keys:  map[string]struct{}{},
