@@ -9,6 +9,11 @@ To install:
 go get github.com/tdakkota/joe-gokv-memory
 ```
 
+### Note
+
+[gokv] currently does not support GetAll/Keys operations(see this [issue]) 
+Package provides `Keys` interface to store list of keys(by default map used).
+
 ### Example usage
 
 ```go
@@ -70,6 +75,7 @@ func (b *Bot) WhatIs(msg joe.Message) error {
 
 [BSD-3-Clause](LICENSE)
 
+[issue]: https://github.com/philippgille/gokv/issues/9
 [joe]: https://github.com/go-joe/joe
 [gokv]: https://github.com/philippgille/gokv
 
