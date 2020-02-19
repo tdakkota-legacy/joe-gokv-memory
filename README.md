@@ -1,4 +1,6 @@
 # Joe Bot - gokv Adapter 
+[![Build Status](https://travis-ci.com/tdakkota/joe-gokv-memory.svg?branch=master)](https://travis-ci.com/tdakkota/joe-gokv-memory)
+[![codecov](https://codecov.io/gh/tdakkota/joe-gokv-memory/branch/master/graph/badge.svg)](https://codecov.io/gh/tdakkota/joe-gokv-memory)
 [![Go Report Card](https://goreportcard.com/badge/github.com/tdakkota/joe-gokv-memory)](https://goreportcard.com/report/github.com/tdakkota/joe-gokv-memory)
 [![CodeFactor](https://www.codefactor.io/repository/github/tdakkota/joe-gokv-memory/badge)](https://www.codefactor.io/repository/github/tdakkota/joe-gokv-memory)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
