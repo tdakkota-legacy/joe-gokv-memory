@@ -1,17 +1,3 @@
-# Joe Bot - gokv Adapter
-Integration [Joe] with [gokv].
-
-## Getting Started
-
-To install:
-
-```
-go get github.com/tdakkota/joe-gokv-memory
-```
-
-### Example usage
-
-```go
 package main
 
 import (
@@ -64,12 +50,3 @@ func (b *Bot) WhatIs(msg joe.Message) error {
 	}
 	return nil
 }
-
-```
-## License
-
-[BSD-3-Clause](LICENSE)
-
-[joe]: https://github.com/go-joe/joe
-[gokv]: https://github.com/philippgille/gokv
-
