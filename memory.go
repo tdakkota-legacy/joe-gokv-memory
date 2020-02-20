@@ -38,7 +38,7 @@ func NewMemory(store gokv.Store, options ...Option) (*MemoryStore, error) {
 	}
 
 	if m.keys == nil {
-		m.keys = &mapKeys{}
+		m.keys = &mapKeys{keys: map[string]struct{}{}}
 	}
 
 	if m.logger == nil {

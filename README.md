@@ -18,6 +18,7 @@ go get github.com/tdakkota/joe-gokv-memory
 ### Note
 
 [gokv] currently does not support GetAll/Keys operations(see this [issue]) 
+
 Package provides `Keys` interface to store list of keys(by default map used).
 
 ### Example usage
