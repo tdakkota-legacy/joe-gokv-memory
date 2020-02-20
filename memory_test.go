@@ -2,51 +2,137 @@ package gokv
 
 import (
 	"github.com/philippgille/gokv/encoding"
+	"github.com/tdakkota/joe-gokv-memory/test"
+	"go.uber.org/zap"
 	"testing"
 )
 
-type MockStore struct {
-	m     map[string][]byte
-	codec encoding.Codec
-}
-
-func (store *MockStore) Set(k string, v interface{}) error {
-	d, err := store.codec.Marshal(v)
-	if err != nil {
-		return err
-	}
-	store.m[k] = d
-	return nil
-}
-
-func (store *MockStore) Get(k string, v interface{}) (bool, error) {
-	d, ok := store.m[k]
-	if !ok {
-		return false, nil
-	}
-	return true, store.codec.Unmarshal(d, v)
-}
-
-func (store *MockStore) Delete(k string) error {
-	delete(store.m, k)
-	return nil
-}
-
-func (store *MockStore) Close() error {
-	return nil
-}
-
-func createMemory() (*MemoryStore, *MockStore) {
-	m := &MockStore{codec: encoding.JSON, m: map[string][]byte{}}
+func createMemory() (*MemoryStore, *test.MockStore) {
+	m := test.NewMockStore(encoding.JSON)
 	v, _ := NewMemory(m)
 	return v, m
 }
 
 const key = "key"
+const invalidKey = ""
 const value = "value"
 
 func TestMemoryStore_Set(t *testing.T) {
-	memory, store := createMemory()
+	t.Run("valid key", func(t *testing.T) {
+		memory, store := createMemory()
+
+		err := memory.Set(key, []byte(value))
+		if err != nil {
+			t.Error(err)
+			return
+		}
+
+		if data, ok := store.Map()[key]; ok {
+			var v []byte
+
+			err := store.Codec.Unmarshal(data, &v)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
+			if string(v) != value {
+				t.Errorf("expected %s, got %s", value, string(v))
+			}
+		} else {
+			t.Error("key doesn't exists")
+		}
+	})
+
+	t.Run("invalid key", func(t *testing.T) {
+		memory, _ := createMemory()
+
+		err := memory.Set(invalidKey, []byte(value))
+		if err == nil {
+			t.Error("error expected")
+			return
+		}
+	})
+}
+
+func TestMemoryStore_Get(t *testing.T) {
+	t.Run("valid key", func(t *testing.T) {
+		memory, store := createMemory()
+
+		data, err := store.Codec.Marshal([]byte(value))
+		if err != nil {
+			t.Error(err)
+			return
+		}
+
+		store.Map()[key] = data
+
+		v, ok, err := memory.Get(key)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+
+		if !ok {
+			t.Error("expected true")
+		}
+
+		if string(v) != value {
+			t.Errorf("expected %s, got %s", value, string(v))
+		}
+	})
+
+	t.Run("invalid key", func(t *testing.T) {
+		memory, _ := createMemory()
+
+		_, ok, err := memory.Get(invalidKey)
+		if ok || err == nil {
+			t.Error("error expected")
+			return
+		}
+	})
+
+}
+
+func TestMemoryStore_Delete(t *testing.T) {
+	t.Run("valid key", func(t *testing.T) {
+		memory, store := createMemory()
+
+		data, err := store.Codec.Marshal([]byte(value))
+		if err != nil {
+			t.Error(err)
+			return
+		}
+
+		store.Map()[key] = data
+
+		ok, err := memory.Delete(key)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+
+		if !ok {
+			t.Error("expected true")
+		}
+	})
+
+	t.Run("invalid key", func(t *testing.T) {
+		memory, _ := createMemory()
+
+		ok, err := memory.Delete(invalidKey)
+		if err == nil {
+			t.Error("error expected")
+		}
+
+		if ok {
+			t.Error("expected false")
+		}
+	})
+}
+
+func TestMemoryStore_Keys(t *testing.T) {
+	memory, _ := createMemory()
 
 	err := memory.Set(key, []byte(value))
 	if err != nil {
@@ -54,67 +140,56 @@ func TestMemoryStore_Set(t *testing.T) {
 		return
 	}
 
-	if data, ok := store.m[key]; ok {
-		var v []byte
+	keys, err := memory.Keys()
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
-		err := store.codec.Unmarshal(data, &v)
-		if err != nil {
-			t.Error(err)
-			return
-		}
-
-		if string(v) != value {
-			t.Errorf("expected %s, got %s", value, string(v))
-		}
-	} else {
-		t.Error("key doesn't exists")
+	if len(keys) < 1 || keys[0] != key {
+		t.Error("expected one key:", key)
 	}
 }
 
-func TestMemoryStore_Delete(t *testing.T) {
+func TestMemoryStore_Close(t *testing.T) {
 	memory, store := createMemory()
 
-	data, err := store.codec.Marshal([]byte(value))
+	err := memory.Close()
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	store.m[key] = data
-
-	ok, err := memory.Delete(key)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if !ok {
-		t.Error("expected true")
+	if !store.Closed() {
+		t.Error("expected that Store is closed")
 	}
 }
 
-func TestMemoryStore_Get(t *testing.T) {
-	memory, store := createMemory()
+func TestNewMemory(t *testing.T) {
+	logger := zap.L()
 
-	data, err := store.codec.Marshal([]byte(value))
+	m, err := NewMemory(test.NewMockStore(encoding.JSON), WithLogger(logger))
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	store.m[key] = data
+	if m.logger != logger {
+		t.Error("expected equal")
+		return
+	}
 
-	v, ok, err := memory.Get(key)
+	err = m.Set(key, []byte(value))
 	if err != nil {
 		t.Error(err)
 		return
 	}
+}
 
-	if !ok {
-		t.Error("expected true")
-	}
-
-	if string(v) != value {
-		t.Errorf("expected %s, got %s", value, string(v))
+func TestMemory(t *testing.T) {
+	m := Memory(test.NewMockStore(encoding.JSON))
+	if m == nil {
+		t.Error("expected *joe.Module instance, not nil")
+		return
 	}
 }
