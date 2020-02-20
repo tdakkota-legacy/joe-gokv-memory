@@ -91,7 +91,6 @@ func TestMemoryStore_Get(t *testing.T) {
 			return
 		}
 	})
-
 }
 
 func TestMemoryStore_Delete(t *testing.T) {
